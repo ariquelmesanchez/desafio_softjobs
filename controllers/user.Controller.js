@@ -4,15 +4,15 @@ const { createUser, getUserByEmail } = require('../models/usersModel');
 
 const handleUserRegistry = async (req, res, next) => {
   try {
-    const { email, password, role, language } = req.body;
+    const { email, password, rol, lenguage } = req.body;
 
-    if (!email || !password || !role || !language) {
+    if (!email || !password || !rol || !lenguage) {
       return res.status(400).json({ error: 'Todos los campos son obligatorios' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await createUser(email, hashedPassword, role, language);
+    const user = await createUser(email, hashedPassword, rol, lenguage);
 
     res.status(201).json(user);
   } catch (error) {
@@ -50,7 +50,7 @@ const login = async (req, res, next) => {
 
 const getProfile = async (req, res, next) => {
   try {
-    const { email } = req.user; // From Token
+    const { email } = req.user; // Email extraído del token
 
     const user = await getUserByEmail(email);
 
@@ -58,8 +58,11 @@ const getProfile = async (req, res, next) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json(user);
+    // Filtrar solo los datos requeridos y devolver en formato array
+    const { rol, lenguage } = user;
+    res.json([{ email, rol, lenguage }]);
   } catch (error) {
+    console.error('Error al obtener el perfil:', error);
     res.status(500).json({ error: 'Error al obtener el perfil' });
   }
 };
